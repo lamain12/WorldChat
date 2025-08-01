@@ -41,7 +41,9 @@ function startSocket() {
         const onlineUsers = document.getElementById("user-list");
         onlineUsers.innerHTML = "";
         data.online_users.forEach(user => {
-        onlineUsers.innerHTML+= `<div>${user}</div>`
+            if (user !== username){
+            onlineUsers.innerHTML+= `<div><button onClick="DM">${user}</button></div>`
+            }
         });
     }
     const chatBox = document.getElementById("chat-box");
@@ -51,6 +53,9 @@ function startSocket() {
   };
 }
 
+function DM(){
+
+}
 function sendMessage() {
   const recipient = document.getElementById("recipient").value;
   const message = document.getElementById("message").value;
