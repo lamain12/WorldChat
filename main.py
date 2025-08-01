@@ -6,6 +6,7 @@ from fastapi import HTTPException
 
 app = FastAPI()
 clients = {}
+online_users=[]
 users = {}
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -36,14 +37,18 @@ def login(user: User):
 @app.websocket("/ws/{username}")
 async def websocket_endpoint(websocket: WebSocket, username ):
     await websocket.accept()
-    for client in clients.values():
-        await client.send_text(f"{username} has joined the chat")
     clients[username] = websocket
+    online_users.append(username)
+    
+    for client in clients.values():
+        await client.send_json({"type":"user_list","username":username,"data": f"{username} has joined the chat","online_users":online_users})
+    
     try:
         while True:
             data = await websocket.receive_text()
             # Broadcasr to all connected clients
             for client in clients.values():
-                await client.send_text(username+": "+data)
+                await client.send_json({"type":"message","username":username,"data":data})
     except WebSocketDisconnect:
         del clients[username]
+        online_users.remove(username)

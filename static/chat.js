@@ -35,9 +35,19 @@ function login() {
 function startSocket() {
   socket = new WebSocket(`ws://localhost:8000/ws/${username}`);
   socket.onmessage = (event) => {
+    console.log("Message received:", event);
+    const data= JSON.parse(event.data);
+    if (data.type === "user_list") {
+        const onlineUsers = document.getElementById("user-list");
+        onlineUsers.innerHTML = "";
+        data.online_users.forEach(user => {
+        onlineUsers.innerHTML+= `<div>${user}</div>`
+        });
+    }
     const chatBox = document.getElementById("chat-box");
-    chatBox.innerHTML += `<div>${event.data}</div>`;
+    chatBox.innerHTML += `<div>${data.data}</div>`;
     chatBox.scrollTop = chatBox.scrollHeight;
+
   };
 }
 
