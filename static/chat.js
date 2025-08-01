@@ -26,6 +26,9 @@ function login() {
       document.getElementById("logged-in-user").textContent = username;
       startSocket();
     }
+    else{
+        alert("Login failed. Please check your username and password.");
+    }
   });
 }
 

@@ -2,10 +2,13 @@ from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import HTMLResponse
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
+from fastapi import HTTPException
+
 app = FastAPI()
 clients = {}
 users = {}
 app.mount("/static", StaticFiles(directory="static"), name="static")
+
 class User(BaseModel):
     username: str
     password: str
@@ -23,9 +26,12 @@ def signup(user: User):
 
 @app.post("/login")
 def login(user: User):
-    if user.username not in users or users[user.username] != user.password:
-        return {"error": "Invalid username or password"}
-    return {"message": "Login successful"}
+    for existing_user in users:
+        print (f"Existing user: {existing_user}")
+    if user.username in users and users[user.username] == user.password:
+        print(f"User {user.username} logged in successfully")
+        return {"message": "Login successful"}
+    raise HTTPException(status_code=400, detail="Invalid username or password")
 
 @app.websocket("/ws/{username}")
 async def websocket_endpoint(websocket: WebSocket, username ):
@@ -41,5 +47,3 @@ async def websocket_endpoint(websocket: WebSocket, username ):
                 await client.send_text(username+": "+data)
     except WebSocketDisconnect:
         del clients[username]
-
-
