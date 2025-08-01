@@ -30,14 +30,15 @@ def login(user: User):
 @app.websocket("/ws/{username}")
 async def websocket_endpoint(websocket: WebSocket, username ):
     await websocket.accept()
-
+    for client in clients.values():
+        await client.send_text(f"{username} has joined the chat")
     clients[username] = websocket
     try:
         while True:
             data = await websocket.receive_text()
             # Broadcasr to all connected clients
             for client in clients.values():
-                await client.send_text(data)
+                await client.send_text(username+": "+data)
     except WebSocketDisconnect:
         del clients[username]
 
